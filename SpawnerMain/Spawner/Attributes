@@ -1,0 +1,43 @@
+local rs = game:GetService("ReplicatedStorage")
+
+local Modules = rs:WaitForChild("Modules")
+
+local chances = require(Modules.SharedModules.AttributeConfigs)
+
+local stringifier = require(Modules.SharedModules:WaitForChild("Stringifier"))
+
+local RARE_RNG = 25000
+
+local Attributes = {}
+Attributes.__index = Attributes
+
+
+function Attributes.roll(part:Part)
+
+	local rolledAttributes = {}
+
+	local rng = 1
+
+	for name, attribute in pairs(chances) do
+		
+		if not attribute.available then continue end
+		
+		local chance = math.random(1, attribute.chance)
+
+		if chance == attribute.chance then
+
+			rng *= chance
+			rolledAttributes[attribute.index] = name
+			attribute._function(part)
+
+		end
+	end
+
+	local concatAttributes = stringifier.concat(stringifier.sort_array(rolledAttributes, stringifier.getkey(rolledAttributes))) -- The original table is an ipairs table with gaps and incorrectly ordered keys, this makes them correctly ordered
+
+	if concatAttributes == "|" then concatAttributes = "None" end
+
+	part:SetAttribute("Attributes", concatAttributes)
+end
+
+return Attributes
